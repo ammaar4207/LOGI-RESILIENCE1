@@ -62,3 +62,7 @@ frontend/build/
 .pytest_cache/
 .coverage
 htmlcov/
+forecast.json
+test_llm.txt
+backend_logs.txt
+LOGI-RESILIENCE1/
