@@ -1,0 +1,19 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "logi-resilience.fullname" . }}-backend-pdb
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: {{ include "logi-resilience.name" . }}-backend
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "logi-resilience.fullname" . }}-worker-pdb
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: {{ include "logi-resilience.name" . }}-worker

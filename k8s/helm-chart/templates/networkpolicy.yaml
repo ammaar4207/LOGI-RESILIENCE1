@@ -1,0 +1,29 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "logi-resilience.fullname" . }}-allow-all-egress
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  - {}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "logi-resilience.fullname" . }}-backend-policy
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ include "logi-resilience.name" . }}-backend
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app: {{ include "logi-resilience.name" . }}-frontend
+    ports:
+    - protocol: TCP
+      port: 8000

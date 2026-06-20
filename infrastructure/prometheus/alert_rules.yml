@@ -1,0 +1,30 @@
+groups:
+  - name: logi-resilience-alerts
+    rules:
+      - alert: BackendDown
+        expr: up{job="fastapi"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Logi-Resilience backend is down"
+          description: "The FastAPI backend instance has been unreachable for more than 30 seconds."
+
+      - alert: HighGlobalRisk
+        expr: http_requests_total > 0 # Dummy expression or placeholder for risk if exposed as custom metric.
+        # Let's write rules that fit Prometheus standards:
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Logi-Resilience risk activity high"
+          description: "The logistics network requests are active, indicating possible simulated disruption load."
+
+      - alert: HighErrorRate
+        expr: rate(http_requests_total{status=~"5.."}[1m]) > 0.1
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "High HTTP 5xx error rate detected"
+          description: "HTTP error rate for 5xx responses is above 10%."

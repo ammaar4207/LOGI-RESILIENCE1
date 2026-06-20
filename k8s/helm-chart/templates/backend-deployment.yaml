@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "logi-resilience.fullname" . }}-backend
+  labels:
+    app: {{ include "logi-resilience.name" . }}-backend
+spec:
+  replicas: {{ .Values.replicaCount.backend }}
+  selector:
+    matchLabels:
+      app: {{ include "logi-resilience.name" . }}-backend
+  template:
+    metadata:
+      labels:
+        app: {{ include "logi-resilience.name" . }}-backend
+    spec:
+      containers:
+        - name: backend
+          image: "{{ .Values.image.repository }}-backend:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources.backend | nindent 12 }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "logi-resilience.fullname" . }}-config
+            - secretRef:
+                name: {{ include "logi-resilience.fullname" . }}-secrets
+
+          # Production readiness: Liveness & Readiness probes
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 10

@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "logi-resilience.fullname" . }}-worker
+  labels:
+    app: {{ include "logi-resilience.name" . }}-worker
+spec:
+  replicas: {{ .Values.replicaCount.worker | default 1 }}
+  selector:
+    matchLabels:
+      app: {{ include "logi-resilience.name" . }}-worker
+  template:
+    metadata:
+      labels:
+        app: {{ include "logi-resilience.name" . }}-worker
+    spec:
+      containers:
+        - name: worker
+          image: "{{ .Values.image.repository }}-backend:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command: ["celery", "-A", "app.celery_app", "worker", "--loglevel=info"]
+          resources:
+            {{- toYaml .Values.resources.worker | nindent 12 }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "logi-resilience.fullname" . }}-config
+            - secretRef:
+                name: {{ include "logi-resilience.fullname" . }}-secrets

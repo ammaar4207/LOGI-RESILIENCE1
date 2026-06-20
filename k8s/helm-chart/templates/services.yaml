@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "logi-resilience.fullname" . }}-backend
+  labels:
+    app: {{ include "logi-resilience.name" . }}-backend
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.backendPort }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ include "logi-resilience.name" . }}-backend
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "logi-resilience.fullname" . }}-frontend
+  labels:
+    app: {{ include "logi-resilience.name" . }}-frontend
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.frontendPort }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: {{ include "logi-resilience.name" . }}-frontend

@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logi-backend
+  labels:
+    app: logi-backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: logi-backend
+  template:
+    metadata:
+      labels:
+        app: logi-backend
+    spec:
+      containers:
+      - name: backend
+        image: logi-backend:latest
+        ports:
+        - containerPort: 8000
+        env:
+        - name: ENVIRONMENT
+          value: "production"
+        - name: REDIS_URL
+          value: "redis://redis-service:6379"
+        - name: NEO4J_URI
+          value: "bolt://neo4j-service:7687"
+        - name: POSTGRES_HOST
+          value: "postgres-service"
+        # Secret reference from HashiCorp Vault Injector would go here
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  selector:
+    app: logi-backend
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+  type: ClusterIP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: logi-frontend
+  labels:
+    app: logi-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: logi-frontend
+  template:
+    metadata:
+      labels:
+        app: logi-frontend
+    spec:
+      containers:
+      - name: frontend
+        image: logi-frontend:latest
+        ports:
+        - containerPort: 80
+        
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  selector:
+    app: logi-frontend
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+  type: LoadBalancer
